@@ -1,0 +1,139 @@
+<div id="clientes-container">
+  <div style="text-align: right; margin-bottom: 20px;">
+    <%= link_to 'Volver al Menú Principal', root_path, class: 'btn btn-volver' %>
+  </div>
+  
+  <h2>Lista de Clientes</h2>
+  
+  <!-- Formulario para NUEVOS clientes -->
+  <div id="formulario-cliente">
+    <h3>Agregar Nuevo Cliente</h3>
+    <input type="text" id="nombre-cliente" placeholder="Nombre del cliente">
+    <input type="text" id="telefono-cliente" placeholder="Teléfono (8 dígitos)">
+    <button id="btn-confirmar-cliente">Crear Cliente</button>
+  </div>
+
+  <!-- Lista de clientes -->
+  <div id="lista-clientes">
+    <h3>Clientes Existentes</h3>
+    <% @clientes.each do |cliente| %>
+      <div class="cliente" data-id="<%= cliente.id %>">
+        <div class="datos-cliente">
+          <span><strong>Nombre:</strong> <%= cliente.nombre %></span>
+          <span><strong>Teléfono:</strong> <%= cliente.telefono %></span>
+        </div>
+        
+        <div class="acciones-cliente">
+          <button class="btn-modificar-cliente">✏️ Modificar</button>
+          <button class="btn-eliminar-cliente">🗑️ Eliminar</button>
+        </div>
+
+        <!-- Formulario oculto para modificación -->
+        <div class="form-modificar-cliente" style="display: none;">
+          <h4>Editar Cliente</h4>
+          <input type="text" class="mod-nombre-cliente" value="<%= cliente.nombre %>">
+          <input type="text" class="mod-telefono-cliente" value="<%= cliente.telefono %>">
+          <button class="btn-confirmar-mod-cliente">💾 Guardar</button>
+          <button class="btn-cancelar-mod-cliente">❌ Cancelar</button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+// JavaScript para crear clientes
+document.getElementById('btn-confirmar-cliente').addEventListener('click', function() {
+  const nombre = document.getElementById('nombre-cliente').value;
+  const telefono = document.getElementById('telefono-cliente').value;
+  
+  fetch('/crear_cliente', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ 
+      nombre: nombre,
+      telefono: telefono
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if(data.error) {
+      alert(data.error);
+    } else {
+      location.reload();
+    }
+  });
+});
+
+// JavaScript para eliminar clientes
+document.querySelectorAll('.btn-eliminar-cliente').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const clienteDiv = this.closest('.cliente');
+    const id = clienteDiv.dataset.id;
+    
+    fetch(`/eliminar_cliente/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.error) {
+        alert(data.error);
+      } else {
+        clienteDiv.remove();
+      }
+    });
+  });
+});
+
+// JavaScript para modificar clientes
+document.querySelectorAll('.btn-modificar-cliente').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const clienteDiv = this.closest('.cliente');
+    clienteDiv.querySelector('.datos-cliente').style.display = 'none';
+    clienteDiv.querySelector('.acciones-cliente').style.display = 'none';
+    clienteDiv.querySelector('.form-modificar-cliente').style.display = 'block';
+  });
+});
+
+document.querySelectorAll('.btn-cancelar-mod-cliente').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const clienteDiv = this.closest('.cliente');
+    clienteDiv.querySelector('.datos-cliente').style.display = '';
+    clienteDiv.querySelector('.acciones-cliente').style.display = '';
+    clienteDiv.querySelector('.form-modificar-cliente').style.display = 'none';
+  });
+});
+
+document.querySelectorAll('.btn-confirmar-mod-cliente').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const clienteDiv = this.closest('.cliente');
+    const id = clienteDiv.dataset.id;
+    
+    fetch(`/actualizar_cliente/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        nombre: clienteDiv.querySelector('.mod-nombre-cliente').value,
+        telefono: clienteDiv.querySelector('.mod-telefono-cliente').value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.error) {
+        alert(data.error);
+      } else {
+        location.reload();
+      }
+    });
+  });
+});
+</script>

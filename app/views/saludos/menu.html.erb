@@ -1,0 +1,61 @@
+<!-- app/views/saludos/menu.html.erb -->
+<div class="menu-principal">
+  <h1>Menú Principal</h1>
+  
+  <div class="botones-menu">
+    <%= link_to 'Productos', productos_path, class: 'btn btn-productos' %>
+    <%= link_to 'Clientes', clientes_path, class: 'btn btn-clientes' %>
+    <%= link_to 'Facturar', facturar_path, class: 'btn btn-facturar' %>
+  </div>
+</div>
+
+<style>
+  .menu-principal {
+    text-align: center;
+    margin-top: 50px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .botones-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 300px;
+    margin: 30px auto;
+  }
+  
+  .btn {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-productos {
+    background-color: #4CAF50;
+  }
+  
+  .btn-productos:hover {
+    background-color: #45a049;
+  }
+  
+  .btn-clientes {
+    background-color: #2196F3;
+  }
+  
+  .btn-clientes:hover {
+    background-color: #0b7dda;
+  }
+  
+  .btn-facturar {
+    background-color: #ff9800;
+  }
+  
+  .btn-facturar:hover {
+    background-color: #e68a00;
+  }
+</style>

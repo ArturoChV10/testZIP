@@ -1,0 +1,161 @@
+<div id="productos-container">
+  <div style="text-align: right; margin-bottom: 20px;">
+    <%= link_to 'Volver al Menú Principal', root_path, class: 'btn btn-volver' %>
+  </div>
+
+  <h2>Lista de Productos</h2>
+  
+  <!-- Formulario para NUEVOS productos (se mantiene igual) -->
+  <div id="formulario-producto">
+    <h3>Agregar Nuevo Producto</h3>
+    <input type="text" id="nombre" placeholder="Nombre del producto">
+    <input type="number" id="precio" placeholder="Precio" step="0.01">
+    <input type="number" id="cantidad" placeholder="Cantidad">
+    <button id="btn-confirmar">Crear Producto</button>
+  </div>
+
+  <!-- Lista de productos (con botones de modificar/eliminar) -->
+  <div id="lista-productos">
+    <h3>Productos Existentes</h3>
+    <% @productos.each do |producto| %>
+      <div class="producto" data-id="<%= producto.id %>">
+        <!-- Datos del producto -->
+        <div class="datos-producto">
+          <span><strong>Nombre:</strong> <%= producto.nombre %></span>
+          <span><strong>Precio:</strong> $<%= producto.precio %></span>
+          <span><strong>Cantidad:</strong> <%= producto.cantidad %></span>
+        </div>
+        
+        <!-- Botones de acción -->
+        <div class="acciones-producto">
+          <button class="btn-modificar">✏️ Modificar</button>
+          <button class="btn-eliminar">🗑️ Eliminar</button>
+        </div>
+
+        <!-- Formulario oculto para modificación -->
+        <div class="form-modificar" style="display: none;">
+          <h4>Editar Producto</h4>
+          <input type="text" class="mod-nombre" value="<%= producto.nombre %>">
+          <input type="number" class="mod-precio" value="<%= producto.precio %>" step="0.01">
+          <input type="number" class="mod-cantidad" value="<%= producto.cantidad %>">
+          <button class="btn-confirmar-mod">💾 Guardar</button>
+          <button class="btn-cancelar-mod">❌ Cancelar</button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+// Código JavaScript para CREAR productos (se mantiene igual)
+document.getElementById('btn-confirmar').addEventListener('click', function() {
+  const nombre = document.getElementById('nombre').value;
+  const precio = document.getElementById('precio').value;
+  const cantidad = document.getElementById('cantidad').value;
+  
+  fetch('/crear_producto', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ 
+      nombre: nombre,
+      precio: precio,
+      cantidad: cantidad 
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if(data.error) {
+      alert(data.error);
+    } else {
+      location.reload(); // Recarga para mostrar el nuevo producto
+    }
+  });
+});
+
+// Código JavaScript para MODIFICAR/ELIMINAR (se mantiene igual)
+document.querySelectorAll('.btn-eliminar').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const productoDiv = this.closest('.producto');
+    const id = productoDiv.dataset.id;
+    
+    fetch(`/eliminar_producto/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.error) {
+        alert(data.error);
+      } else {
+        productoDiv.remove();
+      }
+    });
+  });
+});
+
+// Código para modificación (nuevo)
+document.querySelectorAll('.btn-modificar').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const productoDiv = this.closest('.producto');
+    productoDiv.querySelector('.datos-producto').style.display = 'none';
+    productoDiv.querySelector('.acciones-producto').style.display = 'none';
+    productoDiv.querySelector('.form-modificar').style.display = 'block';
+  });
+});
+
+document.querySelectorAll('.btn-cancelar-mod').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const productoDiv = this.closest('.producto');
+    productoDiv.querySelector('.datos-producto').style.display = '';
+    productoDiv.querySelector('.acciones-producto').style.display = '';
+    productoDiv.querySelector('.form-modificar').style.display = 'none';
+  });
+});
+
+document.querySelectorAll('.btn-confirmar-mod').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const productoDiv = this.closest('.producto');
+    const id = productoDiv.dataset.id;
+    
+    fetch(`/actualizar_producto/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        nombre: productoDiv.querySelector('.mod-nombre').value,
+        precio: productoDiv.querySelector('.mod-precio').value,
+        cantidad: productoDiv.querySelector('.mod-cantidad').value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.error) {
+        alert(data.error);
+      } else {
+        location.reload(); // Recarga para reflejar cambios
+      }
+    });
+  });
+});
+</script>
+
+<style>
+  .btn-volver {
+    background-color: #f44336;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+  }
+  
+  .btn-volver:hover {
+    background-color: #d32f2f;
+  }
+</style>

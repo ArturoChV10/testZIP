@@ -1,0 +1,138 @@
+<div class="facturacion">
+  <%= link_to '← Volver al Menú', root_path, class: 'btn btn-volver' %>
+
+  <h2>Generar Factura</h2>
+
+  <!-- Selección de cliente -->
+  <div class="seccion">
+    <h3>Cliente</h3>
+    <select id="cliente_id" class="form-control">
+      <% @clientes.each do |cliente| %>
+        <option value="<%= cliente.id %>"><%= cliente.nombre %> - <%= cliente.telefono %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <!-- Lista de productos disponibles -->
+  <div class="seccion">
+    <h3>Productos Disponibles</h3>
+    <table class="tabla-productos">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio Unitario</th>
+          <th>Disponibles</th>
+          <th>Cantidad</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @productos.each do |producto| %>
+          <tr data-producto-id="<%= producto.id %>" data-stock="<%= producto.cantidad %>">
+            <td><%= producto.nombre %></td>
+            <td>$<%= number_with_precision(producto.precio, precision: 2) %></td>
+            <td class="stock"><%= producto.cantidad %></td>
+            <td>
+              <input type="number" class="cantidad" value="0" min="0" max="<%= producto.cantidad %>">
+            </td>
+            <td>
+              <button class="btn-agregar">➕ Agregar</button>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Resumen de la factura -->
+  <div class="seccion">
+    <h3>Resumen de Factura</h3>
+    <div id="resumen-factura">
+      <p>No hay productos agregados</p>
+    </div>
+    <div id="total-factura" class="total">
+      <strong>Total: $0.00</strong>
+    </div>
+    
+    <div class="acciones">
+      <%= link_to 'Cancelar', root_path, class: 'btn btn-cancelar' %>
+      <button id="generar-factura" class="btn btn-confirmar" disabled>Generar Factura</button>
+    </div>
+  </div>
+</div>
+
+<%= javascript_include_tag 'facturacion' %>
+
+<style>
+  .btn-volver {
+    background-color: #6c757d;
+    color: white;
+    margin-bottom: 20px;
+  }
+  
+  .tabla-productos {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .tabla-productos th, .tabla-productos td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .seccion {
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+  }
+  
+  #resumen-factura {
+    min-height: 100px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    margin-bottom: 15px;
+  }
+  
+  .total {
+    font-size: 1.2em;
+    text-align: right;
+    margin: 15px 0;
+    color: #28a745;
+  }
+  
+  .acciones {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .btn-cancelar {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .btn-confirmar {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .btn-confirmar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .tabla-resumen {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .tabla-resumen th, .tabla-resumen td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .tabla-resumen th {
+    background-color: #f8f9fa;
+  }
+</style>
